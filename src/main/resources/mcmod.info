@@ -1,0 +1,12 @@
+[
+{
+  "modid": "renderlib",
+  "name": "RenderLib",
+  "version": "1.4.5",
+  "mcversion": "1.8.9",
+  "url": "https://github.com/Meldexun/RenderLib",
+  "authorList": ["Meldexun"],
+  "logoFile": "logo.png",
+  "description": "\u00A7aPort of RenderLib to 1.8.9 by my_life_is_bad"
+}
+]

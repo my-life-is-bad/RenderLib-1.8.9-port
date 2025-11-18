@@ -1,0 +1,75 @@
+package meldexun.renderlib.mixin;
+
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import meldexun.renderlib.RenderLib;
+import meldexun.renderlib.config.RenderLibConfig;
+// import meldexun.renderlib.integration.MenuLib;
+import meldexun.renderlib.util.RenderUtil;
+import meldexun.renderlib.util.SmoothSync;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.client.settings.GameSettings;
+import net.minecraft.util.Timer;
+import net.minecraft.util.MathHelper;
+
+@Mixin(Minecraft.class)
+public class MixinMinecraft {
+
+	@Shadow
+	private boolean isGamePaused;
+	// @Shadow
+	// private float renderPartialTicksPaused;
+	@Shadow
+	private Timer timer;
+	@Shadow
+	public WorldClient theWorld;
+	@Shadow
+	private GameSettings gameSettings;
+	@ModifyArg(method = "runGameLoop", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/fml/common/FMLCommonHandler;onRenderTickStart(F)V", remap = false))
+	public float onRenderTickStart(float partialTick) {
+		return timer.renderPartialTicks;
+	}
+
+	@Inject(method = "runGameLoop", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V", args = "ldc=gameRenderer"))
+	public void runGameLoop(CallbackInfo info) {
+		RenderUtil.update(timer.renderPartialTicks);
+	}
+
+	@ModifyArg(method = "runGameLoop", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/fml/common/FMLCommonHandler;onRenderTickEnd(F)V", remap = false))
+	public float onRenderTickEnd(float partialTick) {
+		return timer.renderPartialTicks;
+	}
+
+	@Inject(method = "updateDisplay", at = @At("HEAD"))
+	public void renderlibFPSLimiter(CallbackInfo info) {
+		if (theWorld == null) {
+			int fps;
+			if (RenderLibConfig.mainMenuFPSSynced) {
+				fps = MathHelper.clamp_int(gameSettings.limitFramerate, 30, 240);
+			} else {
+				fps = RenderLibConfig.mainMenuFPS;
+			}
+			SmoothSync.sync(fps);
+		} else if (gameSettings.limitFramerate < GameSettings.Options.FRAMERATE_LIMIT.getValueMax()) {
+			SmoothSync.sync(gameSettings.limitFramerate);
+		}
+	}
+
+	@Redirect(method = "runGameLoop", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;isFramerateLimitBelowMax()Z"))
+	public boolean vanillaFPSLimiterEnabled(Minecraft mc) {
+		return false;
+	}
+
+	@Redirect(method = "launchIntegratedServer", at = @At(value = "INVOKE", target = "Ljava/lang/Thread;sleep(J)V"))
+	public void launchIntegratedServer_sleep(long millis) {
+
+	}
+
+}

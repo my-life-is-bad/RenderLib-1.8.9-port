@@ -1,0 +1,45 @@
+package meldexun.renderlib.util;
+
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.function.Consumer;
+
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
+
+public class TileEntityUtil {
+	
+	public static void processTileEntities(World world, Consumer<TileEntity> processor) {
+		processTileEntityList(world, tileEntities -> tileEntities.forEach(processor));
+	}
+
+	public static void processTileEntityList(World world, Consumer<List<TileEntity>> processor) {
+		world.processingLoadedTiles = true;
+
+		processor.accept(((ITileEntityHolder) world).getTileEntities());
+
+		world.processingLoadedTiles = false;
+
+		if (!world.addedTileEntityList.isEmpty()) {
+			for (TileEntity tileEntity : world.addedTileEntityList) {
+				if (tileEntity.isInvalid()) {
+					continue;
+				}
+	
+				if (!world.loadedTileEntityList.contains(tileEntity)) {
+					world.addTileEntity(tileEntity);
+				}
+				if (world.isBlockLoaded(tileEntity.getPos())) {
+					Chunk chunk = world.getChunkFromBlockCoords(tileEntity.getPos());
+					IBlockState iblockstate = chunk.getBlockState(tileEntity.getPos());
+					chunk.addTileEntity(tileEntity.getPos(), tileEntity);
+					world.markBlockForUpdate(tileEntity.getPos());//, iblockstate, iblockstate, 3); replaced notifyBlockUpdate
+				}
+			}
+			world.addedTileEntityList.clear();
+		}
+	}
+
+}

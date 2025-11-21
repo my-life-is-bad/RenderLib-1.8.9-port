@@ -9,10 +9,10 @@ import net.minecraftforge.client.MinecraftForgeClient;
 public class EntityRenderList {
 
 	private final List<Entity> entitiesPass0 = new ArrayList<>();
-	private final List<Entity> multipassEntitiesPass0 = new ArrayList<>();
+	//private final List<Entity> multipassEntitiesPass0 = new ArrayList<>();
 	private final List<Entity> outlineEntitiesPass0 = new ArrayList<>();
 	private final List<Entity> entitiesPass1 = new ArrayList<>();
-	private final List<Entity> multipassEntitiesPass1 = new ArrayList<>();
+	//private final List<Entity> multipassEntitiesPass1 = new ArrayList<>();
 	private final List<Entity> outlineEntitiesPass1 = new ArrayList<>();
 
 	public void addEntity(Entity entity) {
@@ -22,12 +22,12 @@ public class EntityRenderList {
 			this.entitiesPass1.add(entity);
 	}
 
-	public void addMultipassEntity(Entity entity) {
-		if (entity.shouldRenderInPass(0))
-			this.multipassEntitiesPass0.add(entity);
-		if (entity.shouldRenderInPass(1))
-			this.multipassEntitiesPass1.add(entity);
-	}
+	// public void addMultipassEntity(Entity entity) {
+	// 	if (entity.shouldRenderInPass(0))
+	// 		this.multipassEntitiesPass0.add(entity);
+	// 	if (entity.shouldRenderInPass(1))
+	// 		this.multipassEntitiesPass1.add(entity);
+	// }
 
 	public void addOutlineEntity(Entity entity) {
 		if (entity.shouldRenderInPass(0))
@@ -40,9 +40,9 @@ public class EntityRenderList {
 		return MinecraftForgeClient.getRenderPass() == 0 ? this.entitiesPass0 : this.entitiesPass1;
 	}
 
-	public List<Entity> getMultipassEntities() {
-		return MinecraftForgeClient.getRenderPass() == 0 ? this.multipassEntitiesPass0 : this.multipassEntitiesPass1;
-	}
+	// public List<Entity> getMultipassEntities() {
+	// 	return MinecraftForgeClient.getRenderPass() == 0 ? this.multipassEntitiesPass0 : this.multipassEntitiesPass1;
+	// }
 
 	public List<Entity> getOutlineEntities() {
 		return MinecraftForgeClient.getRenderPass() == 0 ? this.outlineEntitiesPass0 : this.outlineEntitiesPass1;

@@ -60,10 +60,6 @@ public class EntityRenderer {
 				// if (((IEntityRendererCache) entity).getRenderer().isMultipass()) {
 				// 	entityList.addMultipassEntity(entity);
 				// }
-				Render renderer = Minecraft.getMinecraft().getRenderManager().getEntityRenderObject(entity);
-				if (renderer instanceof RendererLivingEntity && !((RendererLivingEntity) renderer).layerRenderers.isEmpty()) {
-					entityList.addMultipassEntity(entity);
-				}
 			}
 
 			if (this.shouldRenderOutlines(entity)) {
@@ -89,20 +85,11 @@ public class EntityRenderer {
 			mc.getRenderManager().renderEntityStatic(entity, partialTicks, false);
 			this.postRenderEntity();
 		}
-		for (Entity entity : entityList.getMultipassEntities()) {
-			this.preRenderEntity(entity);
-
-			//mc.getRenderManager().renderMultipass(entity, partialTicks);
-			Render renderer = mc.getRenderManager().getEntityRenderObject(entity);
-			if (renderer instanceof RendererLivingEntity) {
-				RendererLivingEntity livingRenderer = (RendererLivingEntity) renderer;
-				livingRenderer.doRender((EntityLivingBase) entity, entity.posX, entity.posY, entity.posZ, entity.rotationYaw, partialTicks);
-			} else {
-				mc.getRenderManager().renderEntityStatic(entity, partialTicks, false);
-			}
-
-			this.postRenderEntity();
-		}
+		// for (Entity entity : entityList.getMultipassEntities()) {
+		// 	this.preRenderEntity(entity);
+		// 	//mc.getRenderManager().renderMultipass(entity, partialTicks);
+		// 	this.postRenderEntity();
+		// }
 		if (MinecraftForgeClient.getRenderPass() == 0 && this.isRenderEntityOutlines() && (!entityList.getOutlineEntities().isEmpty())){ //|| mc.renderGlobal.entityOutlinesRendered)) {
 			mc.theWorld.theProfiler.endStartSection("entityOutlines");
 			mc.renderGlobal.entityOutlineFramebuffer.framebufferClear();

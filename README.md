@@ -1,4 +1,5 @@
 A port of RenderLib v1.4.5 which is a mod made by Meldexun.
+Original Mod : https://github.com/Meldexun/RenderLib/
 
 This port already pre-bundles org.spongepowered and its other dependancies.
 

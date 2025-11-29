@@ -62,7 +62,7 @@ public class RenderLib {
 
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			try {
-				RenderLibConfig.saveConfig(configFile);	//save config on shutdown
+				RenderLibConfig.saveConfig();	//save config on shutdown
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

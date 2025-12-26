@@ -7,10 +7,6 @@ import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.fml.client.config.GuiConfig;
 import meldexun.renderlib.RenderLib;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 public class RenderLibConfigGui extends GuiConfig {
     public RenderLibConfigGui(GuiScreen parent) {
         super(

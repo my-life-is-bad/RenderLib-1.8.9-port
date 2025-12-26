@@ -29,7 +29,6 @@ public class MixinGuiOverlayDebug {
 		search(list, s -> s.startsWith("E:"), i -> {
 			list.set(i, String.format("Entities: %d/%d", EntityRenderManager.renderedEntities(), EntityRenderManager.totalEntities()));
 			list.add(i + 1, String.format("Tile Entities: %d/%d", TileEntityRenderManager.renderedTileEntities(), TileEntityRenderManager.totalTileEntities()));
-			//list.add(i + 2, String.format("Occluded Entites: %d", EntityRenderManager.occludedEntities()));	always 0 anyways
 		});
 		search(list, s -> s.startsWith("P:"), i -> {
 			list.set(i, String.format("Particles: %s", this.mc.effectRenderer.getStatistics()));
@@ -44,5 +43,4 @@ public class MixinGuiOverlayDebug {
 			}
 		}
 	}
-
 }

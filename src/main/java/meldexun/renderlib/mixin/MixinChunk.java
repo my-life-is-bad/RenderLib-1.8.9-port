@@ -1,5 +1,6 @@
 package meldexun.renderlib.mixin;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -8,6 +9,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.tileentity.TileEntity;
@@ -30,8 +32,9 @@ public class MixinChunk {
 	public void getTileEntity(BlockPos pos, EnumCreateEntityType creationMode, CallbackInfoReturnable<TileEntity> info) {
 		if (worldObj.isRemote && !Minecraft.getMinecraft().isCallingFromMinecraftThread()) {
 			TileEntity tileentity = chunkTileEntityMap.get(pos);
+			if (tileentity == null)
 			info.setReturnValue(tileentity != null && !tileentity.isInvalid() ? tileentity : null);
 		}
 	}
-
 }
+

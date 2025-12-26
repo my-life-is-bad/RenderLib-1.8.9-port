@@ -13,6 +13,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import meldexun.renderlib.api.ITileEntityRendererCache;
 import meldexun.renderlib.util.ITileEntityHolder;
@@ -28,7 +30,7 @@ public class MixinWorld implements ITileEntityHolder {
 	@Unique
 	private List<TileEntity> renderableTileEntityList = new ArrayList<>();
 
-	// @ModifyVariable(method = "updateEntities", at = @At(value = "INVOKE", target = "Ljava/util/List;removeAll(Ljava/util/Collection;)Z", remap = false, ordinal = 2, shift = Shift.AFTER), ordinal = 0)//, index = 1, ordinal = 0, name = "remove")
+	// @ModifyVariable(method = "updateEntities", at = @At(value = "INVOKE", target = "Ljava/util/List;removeAll(Ljava/util/Collection;)Z", remap = false, ordinal = 2, shift = Shift.AFTER),index=1)//, ordinal = 0, index = 1, name = "remove")
 	// public Set<TileEntity> updateEntities_removeAll(Set<TileEntity> tileEntities) {
 	// 	if (isRemote) {
 	// 		renderableTileEntityList.removeAll(tileEntities);
@@ -37,14 +39,12 @@ public class MixinWorld implements ITileEntityHolder {
 	// }
 
 	@ModifyArg(method = "updateEntities",at = @At(value = "INVOKE",target = "Ljava/util/List;removeAll(Ljava/util/Collection;)Z",ordinal = 2))
-	private Collection<?> modifyRemoveArg(Collection<?> remove) {
+	private Collection<TileEntity> modifyRemoveArg(Collection<TileEntity> remove) {
 		if (isRemote) {
 			renderableTileEntityList.removeAll(remove);
 		}
 		return remove;
 	}
-
-
 
 	@ModifyVariable(method = "updateEntities", at = @At(value = "INVOKE", target = "Ljava/util/List;remove(Ljava/lang/Object;)Z", remap = false, ordinal = 0, shift = Shift.AFTER), index = 2, ordinal = 0, name = "tileentity")
 	public TileEntity updateEntities_remove(TileEntity tileEntity) {
@@ -56,6 +56,14 @@ public class MixinWorld implements ITileEntityHolder {
 
 	@ModifyVariable(method = "addTileEntity", at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false, ordinal = 1, shift = Shift.AFTER), index = 1, ordinal = 0, name = "tile")
 	public TileEntity addTileEntity_add(TileEntity tileEntity) {
+		if (isRemote && ((ITileEntityRendererCache) tileEntity).hasRenderer()) {
+			renderableTileEntityList.add(tileEntity);
+		}
+		return tileEntity;
+	}
+
+	@ModifyVariable(method = "addTileEntities", at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"), index = 1, ordinal = 0)
+	public TileEntity addTileEntities_add(TileEntity tileEntity) {	//added
 		if (isRemote && ((ITileEntityRendererCache) tileEntity).hasRenderer()) {
 			renderableTileEntityList.add(tileEntity);
 		}

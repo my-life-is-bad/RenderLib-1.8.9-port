@@ -61,25 +61,10 @@ public class RenderLibClassTransformer extends HashMapClassNodeClassTransformer 
 		
 		// @formatter:off
 		registry.addObf("net.minecraft.client.renderer.RenderGlobal", "renderEntities", "func_180446_a", "(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/renderer/culling/ICamera;F)V", ClassWriter.COMPUTE_FRAMES, methodNode -> {
-			//AbstractInsnNode targetNode1 = ASMUtil.first(methodNode).opcode(Opcodes.INVOKESTATIC).methodInsn("com/google/common/collect/Lists", "newArrayList", "()Ljava/util/ArrayList;").find();
-			AbstractInsnNode targetNode1  = ASMUtil.first(methodNode)
-			.opcode(Opcodes.INVOKEVIRTUAL)
-			.methodInsnObf("net/minecraft/profiler/Profiler", "endStartSection", "func_76318_c", "(Ljava/lang/String;)V")
-			.find();
+			
+			AbstractInsnNode targetNode1 = ASMUtil.first(methodNode).methodInsnObf("net/minecraft/client/renderer/RenderGlobal", "isRenderEntityOutlines", "func_174985_d", "()Z").find();
+			targetNode1 = ASMUtil.prev(methodNode, targetNode1).type(LabelNode.class).find();	//some editted stuff
 
-		while (targetNode1  != null) {
-			AbstractInsnNode prev = targetNode1 .getPrevious();
-			if (prev instanceof LdcInsnNode) {
-				LdcInsnNode ldc = (LdcInsnNode) prev;
-				if ("entities".equals(ldc.cst)) {
-					break;
-				}
-			}
-			targetNode1  = targetNode1 .getNext();
-		}
-
-
-			//targetNode1  = ASMUtil.prev(methodNode, targetNode1).type(LabelNode.class).find();
 			AbstractInsnNode popNode1 = ASMUtil.first(methodNode).opcode(Opcodes.INVOKEVIRTUAL).methodInsn("net/minecraft/client/renderer/tileentity/TileEntityRendererDispatcher", "preDrawBatch", "()V").find();
 			popNode1 = ASMUtil.prev(methodNode, popNode1).opcode(Opcodes.INVOKEVIRTUAL).methodInsnObf("net/minecraft/profiler/Profiler", "endStartSection", "func_76318_c", "(Ljava/lang/String;)V").find();
 			if (OPTIFINE_DETECTED) {
@@ -88,7 +73,9 @@ public class RenderLibClassTransformer extends HashMapClassNodeClassTransformer 
 			}
 			popNode1 = ASMUtil.prev(methodNode, popNode1).type(LabelNode.class).find();
 
-			AbstractInsnNode targetNode2 = ASMUtil.first(methodNode).opcode(Opcodes.INVOKEVIRTUAL).methodInsn("net/minecraft/client/renderer/tileentity/TileEntityRendererDispatcher", "preDrawBatch", "()V").find();//AbstractInsnNode targetNode2 = ASMUtil.first(methodNode).opcode(Opcodes.INVOKEVIRTUAL).methodInsn("net/minecraft/world/chunk/CompiledChunk", "getTileEntities", "()Ljava/util/List;").find();
+
+			
+			AbstractInsnNode targetNode2 = ASMUtil.first(methodNode).opcode(Opcodes.INVOKEVIRTUAL).methodInsn("net/minecraft/client/renderer/tileentity/TileEntityRendererDispatcher", "preDrawBatch", "()V").find();
 			if (OPTIFINE_DETECTED) {
 				targetNode2 = ASMUtil.next(methodNode, targetNode2).opcode(Opcodes.INVOKESTATIC).methodInsn("net/minecraft/client/renderer/tileentity/TileEntitySignRenderer", "updateTextRenderDistance", "()V").find();
 			}

@@ -79,6 +79,7 @@ public class EntityRenderer {
 
 	protected void renderEntities(float partialTicks, EntityRenderList entityList) {
 		Minecraft mc = Minecraft.getMinecraft();
+		mc.theWorld.theProfiler.endStartSection("entities");	//added
 
 		for (Entity entity : entityList.getEntities()) {
 			this.preRenderEntity(entity);
@@ -90,9 +91,11 @@ public class EntityRenderer {
 		// 	//mc.getRenderManager().renderMultipass(entity, partialTicks);
 		// 	this.postRenderEntity();
 		// }
+
 		if (MinecraftForgeClient.getRenderPass() == 0 && this.isRenderEntityOutlines() && (!entityList.getOutlineEntities().isEmpty())){ //|| mc.renderGlobal.entityOutlinesRendered)) {
 			mc.theWorld.theProfiler.endStartSection("entityOutlines");
 			mc.renderGlobal.entityOutlineFramebuffer.framebufferClear();
+
 			//mc.renderGlobal.entityOutlinesRendered = !entityList.getOutlineEntities().isEmpty();
 
 			if (!entityList.getOutlineEntities().isEmpty()) {

@@ -58,7 +58,7 @@ public class MixinWorld implements ITileEntityHolder {
 
 	@ModifyVariable(method = "addTileEntity", at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false, ordinal = 0, shift = Shift.AFTER), index = 1, ordinal = 0, name = "tile")
 	public TileEntity addTileEntity_add(TileEntity tileEntity) {
-		if (isRemote && ((ITileEntityRendererCache) tileEntity).hasRenderer()) {
+		if (isRemote && ((ITileEntityRendererCache) tileEntity).hasRenderer() && !processingLoadedTiles) {
 			renderableTileEntityList.add(tileEntity);
 		}
 		return tileEntity;
@@ -66,7 +66,7 @@ public class MixinWorld implements ITileEntityHolder {
 
 	@ModifyVariable(method = "addTileEntities", at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false, ordinal = 0, shift = Shift.AFTER), index = 1, ordinal = 0)
 	public TileEntity addTileEntities_add(TileEntity tileEntity) {	//added
-		if (isRemote && ((ITileEntityRendererCache) tileEntity).hasRenderer() && !processingLoadedTiles) {
+		if (isRemote && ((ITileEntityRendererCache) tileEntity).hasRenderer()) {
 			renderableTileEntityList.add(tileEntity);
 		}
 		return tileEntity;

@@ -28,7 +28,7 @@ public class MixinChunk {
 
 	@Inject(method = "getTileEntity", cancellable = true, at = @At("HEAD"))
 	public void getTileEntity(BlockPos pos, EnumCreateEntityType creationMode, CallbackInfoReturnable<TileEntity> info) {
-		if (worldObj.isRemote && !Minecraft.getMinecraft().isCallingFromMinecraftThread() && creationMode != EnumCreateEntityType.QUEUED) {
+        if (worldObj.isRemote && !Minecraft.getMinecraft().isCallingFromMinecraftThread() && creationMode != EnumCreateEntityType.QUEUED) {
 			TileEntity tileentity = chunkTileEntityMap.get(pos);
 			info.setReturnValue(tileentity != null && !tileentity.isInvalid() ? tileentity : null);
 		}

@@ -111,7 +111,7 @@ public class EntityRenderer {
         ));
         mc.theWorld.theProfiler.endSection();
 
-		for (Entity entity : entityList.getEntities()) {
+		for (Entity entity : sortedEntities) {
             mc.theWorld.theProfiler.startSection("render");
             this.preRenderEntity(entity);
             mc.getRenderManager().renderEntityStatic(entity, partialTicks, false);

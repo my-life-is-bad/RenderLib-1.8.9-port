@@ -1,11 +1,9 @@
 package meldexun.renderlib.renderer.entity;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.*;
 
 import org.lwjgl.opengl.GL11;
 
-import meldexun.renderlib.RenderLib;
 import meldexun.renderlib.api.IEntityRendererCache;
 import meldexun.renderlib.api.ILoadable;
 // import meldexun.renderlib.integration.FairyLights;
@@ -18,12 +16,9 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.client.renderer.entity.RendererLivingEntity;
-//import net.minecraft.client.renderer.entity.layers.LayerArmorBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraft.client.renderer.entity.Render;
 
 public class EntityRenderer {
 
@@ -57,9 +52,6 @@ public class EntityRenderer {
 
 				entityList.addEntity(entity);
 
-				// if (((IEntityRendererCache) entity).getRenderer().isMultipass()) {
-				// 	entityList.addMultipassEntity(entity);
-				// }
 			}
 
 			if (this.shouldRenderOutlines(entity)) {
@@ -79,58 +71,57 @@ public class EntityRenderer {
 
 	protected void renderEntities(float partialTicks, EntityRenderList entityList) {
 		Minecraft mc = Minecraft.getMinecraft();
+
+        if (this.isRenderEntityOutlines()){
+            GlStateManager.depthFunc(GL11.GL_ALWAYS);
+            GlStateManager.disableFog();
+            mc.renderGlobal.entityOutlineFramebuffer.framebufferClear();
+            mc.renderGlobal.entityOutlineFramebuffer.bindFramebuffer(false);
+            mc.theWorld.theProfiler.endStartSection("entityOutlines");
+            RenderHelper.disableStandardItemLighting();
+            mc.getRenderManager().setRenderOutlines(true);
+
+            for (Entity entity : entityList.getOutlineEntities()) {
+                this.preRenderEntity(entity);
+                mc.getRenderManager().renderEntityStatic(entity, partialTicks, false);
+                this.postRenderEntity();
+            }
+
+            mc.getRenderManager().setRenderOutlines(false);
+            RenderHelper.enableStandardItemLighting();
+            GlStateManager.depthMask(false);
+            mc.renderGlobal.entityOutlineShader.loadShaderGroup(partialTicks);
+            GlStateManager.enableLighting();
+            GlStateManager.depthMask(true);
+            mc.getFramebuffer().bindFramebuffer(false);
+            GlStateManager.enableFog();
+            GlStateManager.enableBlend();
+            GlStateManager.enableColorMaterial();
+            GlStateManager.depthFunc(GL11.GL_LEQUAL);
+            GlStateManager.enableDepth();
+            GlStateManager.enableAlpha();
+        }
+
 		mc.theWorld.theProfiler.endStartSection("entities");	//added
 
+        mc.theWorld.theProfiler.startSection("sortEntities");
+        List<Entity> sortedEntities = new ArrayList<>(entityList.getEntities());
+        sortedEntities.sort(Comparator.comparingDouble(
+                e -> mc.getRenderViewEntity().getDistanceSq(e.getPosition())
+        ));
+        mc.theWorld.theProfiler.endSection();
+
 		for (Entity entity : entityList.getEntities()) {
-			this.preRenderEntity(entity);
-			mc.getRenderManager().renderEntityStatic(entity, partialTicks, false);
+            mc.theWorld.theProfiler.startSection("render");
+            this.preRenderEntity(entity);
+            mc.getRenderManager().renderEntityStatic(entity, partialTicks, false);
 			this.postRenderEntity();
-		}
-		// for (Entity entity : entityList.getMultipassEntities()) {
-		// 	this.preRenderEntity(entity);
-		// 	//mc.getRenderManager().renderMultipass(entity, partialTicks);
-		// 	this.postRenderEntity();
-		// }
-
-		if (MinecraftForgeClient.getRenderPass() == 0 && this.isRenderEntityOutlines() && (!entityList.getOutlineEntities().isEmpty())){ //|| mc.renderGlobal.entityOutlinesRendered)) {
-			mc.theWorld.theProfiler.endStartSection("entityOutlines");
-			mc.renderGlobal.entityOutlineFramebuffer.framebufferClear();
-
-			//mc.renderGlobal.entityOutlinesRendered = !entityList.getOutlineEntities().isEmpty();
-
-			if (!entityList.getOutlineEntities().isEmpty()) {
-				GlStateManager.depthFunc(GL11.GL_ALWAYS);
-				GlStateManager.disableFog();
-				mc.renderGlobal.entityOutlineFramebuffer.bindFramebuffer(false);
-				RenderHelper.disableStandardItemLighting();
-				mc.getRenderManager().setRenderOutlines(true);
-
-				for (Entity entity : entityList.getOutlineEntities()) {
-					this.preRenderEntity(entity);
-					mc.getRenderManager().renderEntityStatic(entity, partialTicks, false);
-					this.postRenderEntity();
-				}
-
-				mc.getRenderManager().setRenderOutlines(false);
-				RenderHelper.enableStandardItemLighting();
-				GlStateManager.depthMask(false);
-				mc.renderGlobal.entityOutlineShader.loadShaderGroup(partialTicks);
-				GlStateManager.enableLighting();
-				GlStateManager.depthMask(true);
-				GlStateManager.enableFog();
-				GlStateManager.enableBlend();
-				GlStateManager.enableColorMaterial();
-				GlStateManager.depthFunc(GL11.GL_LEQUAL);
-				GlStateManager.enableDepth();
-				GlStateManager.enableAlpha();
-			}
-
-			mc.getFramebuffer().bindFramebuffer(false);
+            mc.theWorld.theProfiler.endSection();
 		}
 	}
 
 	private boolean shouldRender(Entity entity, ICamera frustum, double partialTicks, double camX, double camY, double camZ) {
-		if (!((IEntityRendererCache) entity).hasRenderer()) {
+        if (!((IEntityRendererCache) entity).hasRenderer()) {
 			return false;
 		}
 		if (!((ILoadable) entity).isChunkLoaded()) {
@@ -143,8 +134,8 @@ public class EntityRenderer {
 			return false;
 		}
 
-		if (!((IEntityRendererCache) entity).getRenderer().shouldRender(entity, frustum, camX, camY, camZ)){ //&& !entity.isRidingOrBeingRiddenBy(Minecraft.getMinecraft().thePlayer)) {
-			this.setCanBeOcclusionCulled(entity, false);		//no riding capabilities in 1.8.9 :/
+		if (!((IEntityRendererCache) entity).getRenderer().shouldRender(entity, frustum, camX, camY, camZ) && !(entity.riddenByEntity == Minecraft.getMinecraft().thePlayer)) {
+			this.setCanBeOcclusionCulled(entity, false);
 			return false;
 		}
 

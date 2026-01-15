@@ -29,6 +29,7 @@ public class EntityRenderer {
 	private int camChunkZ;
 	private int renderDist;
 	private final Deque<EntityRenderList> entityListQueue = new ArrayDeque<>();
+    protected final List<Entity> sortedEntities = new ArrayList<>();
 
 	public void setup(ICamera frustum, float partialTicks, double camX, double camY, double camZ) {
 		Minecraft mc = Minecraft.getMinecraft();
@@ -54,9 +55,9 @@ public class EntityRenderer {
 
 			}
 
-			if (this.shouldRenderOutlines(entity)) {
-				entityList.addOutlineEntity(entity);
-			}
+            if (this.shouldRenderOutlines(entity)) {
+                entityList.addOutlineEntity(entity);
+            }
 		}
 		this.entityListQueue.addLast(entityList);
 	}
@@ -71,13 +72,24 @@ public class EntityRenderer {
 
 	protected void renderEntities(float partialTicks, EntityRenderList entityList) {
 		Minecraft mc = Minecraft.getMinecraft();
+        this.sortedEntities.clear();
 
-        if (this.isRenderEntityOutlines()){
+        if (!entityList.getEntities().isEmpty()) {
+            mc.theWorld.theProfiler.endStartSection("sortEntities");
+            this.sortedEntities.addAll(entityList.getEntities());
+            this.sortedEntities.sort(Comparator.comparingDouble(
+                    e -> mc.getRenderViewEntity().getDistanceSq(e.getPosition())
+            ));
+        } else {
+            return;
+        }
+
+        if (this.isRenderEntityOutlines() && !entityList.getOutlineEntities().isEmpty()){
+            mc.theWorld.theProfiler.endStartSection("entityOutlines");
             GlStateManager.depthFunc(GL11.GL_ALWAYS);
             GlStateManager.disableFog();
             mc.renderGlobal.entityOutlineFramebuffer.framebufferClear();
             mc.renderGlobal.entityOutlineFramebuffer.bindFramebuffer(false);
-            mc.theWorld.theProfiler.endStartSection("entityOutlines");
             RenderHelper.disableStandardItemLighting();
             mc.getRenderManager().setRenderOutlines(true);
 
@@ -104,19 +116,10 @@ public class EntityRenderer {
 
 		mc.theWorld.theProfiler.endStartSection("entities");	//added
 
-        mc.theWorld.theProfiler.startSection("sortEntities");
-        List<Entity> sortedEntities = new ArrayList<>(entityList.getEntities());
-        sortedEntities.sort(Comparator.comparingDouble(
-                e -> mc.getRenderViewEntity().getDistanceSq(e.getPosition())
-        ));
-        mc.theWorld.theProfiler.endSection();
-
-		for (Entity entity : sortedEntities) {
-            mc.theWorld.theProfiler.startSection("render");
+		for (Entity entity : this.sortedEntities) {
             this.preRenderEntity(entity);
             mc.getRenderManager().renderEntityStatic(entity, partialTicks, false);
 			this.postRenderEntity();
-            mc.theWorld.theProfiler.endSection();
 		}
 	}
 
@@ -166,21 +169,6 @@ public class EntityRenderer {
 		return false;
 	}
 
-	protected boolean shouldRenderOutlines(Entity entity) {
-		// if (entity.isGlowing()) {
-		// 	return true;
-		// }
-		// Glowing outlines are not supported in 1.8.9
-		Minecraft mc = Minecraft.getMinecraft();
-		if (!mc.thePlayer.isSpectator()) {
-			return false;
-		}
-		if (!mc.gameSettings.keyBindSpectatorOutlines.isKeyDown()) {
-			return false;
-		}
-		return entity instanceof EntityPlayer;
-	}
-
 	protected void preRenderEntity(Entity entity) {
 		entity.shouldRenderInPass(MinecraftForgeClient.getRenderPass());
 	}
@@ -188,6 +176,21 @@ public class EntityRenderer {
 	protected void postRenderEntity() {
 
 	}
+
+    protected boolean shouldRenderOutlines(Entity entity) {
+        // if (entity.isGlowing()) {
+        // 	return true;
+        // }
+        // Glowing outlines are not supported in 1.8.9
+        Minecraft mc = Minecraft.getMinecraft();
+        if (!mc.thePlayer.isSpectator()) {
+            return false;
+        }
+        if (!mc.gameSettings.keyBindSpectatorOutlines.isKeyDown()) {
+            return false;
+        }
+        return entity instanceof EntityPlayer;
+    }
 
 	protected boolean isRenderEntityOutlines() {
 		Minecraft mc = Minecraft.getMinecraft();

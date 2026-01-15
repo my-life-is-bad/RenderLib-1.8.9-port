@@ -13,7 +13,7 @@ public class EntityRendererOptifine extends EntityRenderer {
 		super.renderEntities(partialTicks, entityList);
 
 		Minecraft mc = Minecraft.getMinecraft();
-		if (!this.isRenderEntityOutlines()) {// && (!entityList.getOutlineEntities().isEmpty() || mc.renderGlobal.entityOutlinesRendered)) {
+		if (!this.isRenderEntityOutlines()  && (!entityList.getOutlineEntities().isEmpty())) {//|| mc.renderGlobal.entityOutlinesRendered)) {
 			mc.theWorld.theProfiler.endStartSection("entityOutlines");
 			//mc.renderGlobal.entityOutlinesRendered = !entityList.getOutlineEntities().isEmpty();
 

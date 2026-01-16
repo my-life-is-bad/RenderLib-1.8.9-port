@@ -7,7 +7,8 @@ Original Mod: https://github.com/Meldexun/RenderLib/
 
 # Requirements
 
-This port already pre-bundles org.spongepowered and its other dependencies, so there are no external requirements.
+This port already pre-bundles org.spongepowered.
+It requires ConfigurationsBackport v1.1
 
 # Required By
 

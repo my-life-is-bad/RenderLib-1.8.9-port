@@ -7,7 +7,7 @@ import java.util.Locale;
 
 import javax.annotation.Nullable;
 
-import net.minecraftforge.common.config.Config;
+import my_life_is_bad.configurationsbackport.common.config.Config;
 
 public class ConfigUtil {
 

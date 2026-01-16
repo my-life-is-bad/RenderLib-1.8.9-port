@@ -25,7 +25,7 @@ public abstract class MixinRenderManager {
 		return ((IEntityRendererCache) entityIn).getRenderer();
 	}
 
-	/** {@link RenderManager#renderEntity(Entity, double, double, double, float, float, boolean)} */
+	/** {@link RenderManager#doRenderEntity(Entity, double, double, double, float, float, boolean)} */
 	@Redirect(method = { "doRenderEntity", "laggoggles_trueRender(Lnet/minecraft/entity/Entity;DDDFFZ)Z"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/RenderManager;getEntityRenderObject(Lnet/minecraft/entity/Entity;)Lnet/minecraft/client/renderer/entity/Render;"))
 	public Render renderEntity_getEntityRenderObject(RenderManager renderManager, Entity entityIn) {	//Render<Entity>	//doRenderEntity instead of renderEntity in 1.8.9
 		return ((IEntityRendererCache) entityIn).getRenderer();											//, "laggoggles_trueRender(Lnet/minecraft/entity/Entity;DDDFFZ)V" no laggoggles ig

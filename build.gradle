@@ -71,6 +71,8 @@ dependencies {
     shade('it.unimi.dsi:fastutil:7.1.0')
 
     shade files('libs/ASMUtil-2.8.0.jar')     //patched for 1.8.9 log4j 2.0-beta9
+    compile 'my-life-is-bad:ConfigurationsBackport:1.8.9-1.1@jar'
+
     shade('meldexun:MemoryUtil:1.1.0@jar')
     shade('meldexun:MatrixUtil:1.5.0@jar')
     shade('meldexun:ReflectionUtil:1.0.0@jar')

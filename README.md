@@ -8,7 +8,7 @@ Original Mod: https://github.com/Meldexun/RenderLib/
 # Requirements
 
 This port already pre-bundles org.spongepowered.
-It requires ConfigurationsBackport v1.1
+It requires ConfigurationsBackport v1.1 from https://github.com/my-life-is-bad/ConfigurationsBackport/releases/tag/v1.8.9-1.1
 
 # Required By
 
